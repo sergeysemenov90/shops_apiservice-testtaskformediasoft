@@ -17,6 +17,7 @@ from django.contrib import admin
 from django.contrib.auth.models import User
 from django.urls import path, include
 from rest_framework import routers, serializers, viewsets
+from shops.views import CityViewset, StreetViewset, ShopViewset
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -32,6 +33,9 @@ class UserViewSet(viewsets.ModelViewSet):
 
 router = routers.DefaultRouter()
 router.register(r'users', UserViewSet)
+router.register(r'cities/', CityViewset)
+router.register(r'streets', StreetViewset)
+router.register(r'shops/', ShopViewset)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
