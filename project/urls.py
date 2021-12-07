@@ -20,25 +20,8 @@ from rest_framework import routers, serializers, viewsets
 from shops.views import CityViewset, StreetViewset, ShopViewset
 
 
-class UserSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = User
-        fields = ['url', 'username', 'email', 'is_staff']
-
-
-class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-
-
-router = routers.DefaultRouter()
-router.register(r'users', UserViewSet)
-router.register(r'cities/', CityViewset)
-router.register(r'streets', StreetViewset)
-router.register(r'shops/', ShopViewset)
-
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include(router.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    path('city/', CityViewset.as_view({'get': 'list'})),
 ]

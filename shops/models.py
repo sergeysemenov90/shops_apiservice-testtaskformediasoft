@@ -18,7 +18,7 @@ class Street(models.Model):
 
 class Shop(models.Model):
     name = models.CharField(max_length=100)
-    city = models.ForeignKey(to=City, on_delete=models.CASCADE)
+    city = models.ForeignKey(to=City, on_delete=models.CASCADE, related_name='shops')
     street = models.ForeignKey(to=Street, on_delete=models.CASCADE)
     house = models.CharField(max_length=30)
     opening_time = models.TimeField()
