@@ -1,10 +1,13 @@
-from rest_framework import serializers
-from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.generics import CreateAPIView, ListAPIView
 from .models import City, Street, Shop
 from .serializers import (CityListSerializer, CityDetailSerializer,
                           StreetListSerializer, ShopListSerializer,
                           ShopCreateSerializer, ShopDetailSerializer)
+from rest_framework import status
+from rest_framework.response import Response
+from django_filters.rest_framework import DjangoFilterBackend
+from .service import ShopsFilter
 
 class CityListView(APIView):
     """Вывод списка городов"""
@@ -21,7 +24,6 @@ class CityDetailView(APIView):
     def get(self, request, pk):
         city = City.objects.get(id=pk)
         serializer = CityDetailSerializer(city)
-        print(serializer.data)
         return Response(serializer.data)
 
 
@@ -34,24 +36,25 @@ class StreetListView(APIView):
         return Response(serializer.data)
 
 
-class ShopListView(APIView):
+class ShopListView(ListAPIView):
     """Вывод списка магазинов"""
+    queryset = Shop.objects.all()
+    serializer_class = ShopListSerializer
+    filter_backends = (DjangoFilterBackend, )
+    filterset_class = ShopsFilter
 
-    def get(self, request):
-        shops = Shop.objects.all()
-        serializer = ShopListSerializer(shops, many=True)
-        return Response(serializer.data)
 
-
-class ShopCreateView(APIView):
+class ShopCreateView(CreateAPIView):
     """Создание магазина"""
 
-    def post(self, request):
-        shop = ShopCreateSerializer(data=request.data)
-        if shop.is_valid():
-            shop = shop.save()
-        data = {'shop_id' : shop.id}
-        return Response(status=201, data=data)
+    serializer_class = ShopCreateSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response({'id': serializer.data["id"]}, status=status.HTTP_201_CREATED, headers=headers)
 
 
 class ShopDetailView(APIView):
@@ -62,10 +65,3 @@ class ShopDetailView(APIView):
         serializer = ShopDetailSerializer(shop)
         print(serializer.data)
         return Response(serializer.data)
-
-    # def post(self, request):
-    #     shop = ShopCreateSerializer(data=request.data)
-    #     if shop.is_valid():
-    #         shop.save()
-    #     data = {'id' : shop.pk}
-    #     return Response(status=201, data=data)

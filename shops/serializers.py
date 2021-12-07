@@ -27,6 +27,9 @@ class StreetListSerializer(serializers.ModelSerializer):
 
 
 class ShopListSerializer(serializers.ModelSerializer):
+    city = serializers.SlugRelatedField(slug_field='name', read_only=True)
+    street = serializers.SlugRelatedField(slug_field='name', read_only=True)
+
     class Meta:
         model = Shop
         fields = '__all__'
