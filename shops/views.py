@@ -1,21 +1,71 @@
-from django.shortcuts import render
-from rest_framework import viewsets
-from shops.models import City, Street, Shop
-from shops.serializers import CitySerializer, StreetSerializer, ShopSerializer
+from rest_framework import serializers
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from .models import City, Street, Shop
+from .serializers import (CityListSerializer, CityDetailSerializer,
+                          StreetListSerializer, ShopListSerializer,
+                          ShopCreateSerializer, ShopDetailSerializer)
+
+class CityListView(APIView):
+    """Вывод списка городов"""
+
+    def get(self, request):
+        cities = City.objects.all()
+        serializer = CityListSerializer(cities, many=True)
+        return Response(serializer.data)
 
 
-class CityViewset(viewsets.ModelViewSet):
-    queryset = City.objects.all()
-    serializer_class = CitySerializer
+class CityDetailView(APIView):
+    """Вывод конкретного города"""
+
+    def get(self, request, pk):
+        city = City.objects.get(id=pk)
+        serializer = CityDetailSerializer(city)
+        print(serializer.data)
+        return Response(serializer.data)
 
 
-class StreetViewset(viewsets.ModelViewSet):
-    queryset = Street.objects.all()
-    serializer_class = StreetSerializer
+class StreetListView(APIView):
+    """Вывод списка улиц"""
+
+    def get(self, request):
+        streets = Street.objects.all()
+        serializer = StreetListSerializer(streets, many=True)
+        return Response(serializer.data)
 
 
-class ShopViewset(viewsets.ModelViewSet):
-    queryset = Shop.objects.all()
-    serializer_class = ShopSerializer
+class ShopListView(APIView):
+    """Вывод списка магазинов"""
 
-# Create your views here.
+    def get(self, request):
+        shops = Shop.objects.all()
+        serializer = ShopListSerializer(shops, many=True)
+        return Response(serializer.data)
+
+
+class ShopCreateView(APIView):
+    """Создание магазина"""
+
+    def post(self, request):
+        shop = ShopCreateSerializer(data=request.data)
+        if shop.is_valid():
+            shop = shop.save()
+        data = {'shop_id' : shop.id}
+        return Response(status=201, data=data)
+
+
+class ShopDetailView(APIView):
+    """Вывод конкретного магазина"""
+
+    def get(self, request, pk):
+        shop = Shop.objects.get(id=pk)
+        serializer = ShopDetailSerializer(shop)
+        print(serializer.data)
+        return Response(serializer.data)
+
+    # def post(self, request):
+    #     shop = ShopCreateSerializer(data=request.data)
+    #     if shop.is_valid():
+    #         shop.save()
+    #     data = {'id' : shop.pk}
+    #     return Response(status=201, data=data)
