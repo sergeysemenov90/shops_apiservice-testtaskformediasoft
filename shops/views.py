@@ -1,3 +1,4 @@
+from django.db.models import Q
 from rest_framework.views import APIView
 from rest_framework.generics import CreateAPIView, ListAPIView
 from .models import City, Street, Shop
@@ -8,6 +9,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from .service import ShopsFilter
+from datetime import datetime
 
 class CityListView(APIView):
     """Вывод списка городов"""
@@ -38,7 +40,21 @@ class StreetListView(APIView):
 
 class ShopListView(ListAPIView):
     """Вывод списка магазинов"""
-    queryset = Shop.objects.all()
+
+    def get_queryset(self):
+        queryset = Shop.objects.all()
+        open = self.request.GET.get('open')
+        time = datetime.now().time()
+        print(time)
+        if open == '1':
+            print('We have open parameter')
+            queryset = queryset.filter(opening_time__lte=time).filter(closing_time__gt=time)
+        if open == '0':
+            print('We have 0 open parameter')
+            queryset = queryset.filter(Q(opening_time__gt=time) | Q(closing_time__lte=time))
+
+        return queryset
+
     serializer_class = ShopListSerializer
     filter_backends = (DjangoFilterBackend, )
     filterset_class = ShopsFilter
